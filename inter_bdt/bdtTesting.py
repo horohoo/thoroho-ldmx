@@ -5,6 +5,7 @@ import math
 import statistics
 import sys
 import random
+import json
 
 from LDMX.Framework import EventTree
 from LDMX.Framework import ldmxcfg
@@ -33,14 +34,11 @@ class sampleContainer:
         self.events = []
         evtcount = 0
 
-        
-        #c0 = TCanvas()
         c1 = TCanvas()
         c2 = TCanvas()
         c3 = TCanvas()
         c4 = TCanvas()
         
-        h0 = TH1F("totalevents", "totalevents", 100, 0, 1000)
         h1 = TH1F("passtrigger", "passtrigger", 100, 0, 1000)
         h2 = TH1F("passEnergyReq", "passEnergyReq", 100, 0, 1000)
         h3 = TH1F("passTrackerVeto", "passTrackerVeto", 100, 0, 1000)
@@ -52,18 +50,18 @@ class sampleContainer:
             tree = EventTree.EventTree(fn)
             for event in tree:
                 if isBkg:
-                    ecalRecHits = event.EcalRecHits_sim
-                    hcalRecHits = event.HcalRecHits_sim
+                    EcalRecHits = event.EcalRecHits_sim
+                    HcalRecHits = event.HcalRecHits_sim
                     SimParticles = event.SimParticles_sim
-                    targetScoringPlaneHits = event.TargetScoringPlaneHits_sim
-                    recoilSimHits = event.RecoilSimHits_sim
+                    TargetScoringPlaneHits = event.TargetScoringPlaneHits_sim
+                    RecoilSimHits = event.RecoilSimHits_sim
 
                 else:
-                    ecalRecHits = event.EcalRecHits_v14
-                    hcalRecHits = event.HcalRecHits_v14
+                    EcalRecHits = event.EcalRecHits_v14
+                    HcalRecHits = event.HcalRecHits_v14
                     SimParticles = event.SimParticles_v14
-                    targetScoringPlaneHits = event.TargetScoringPlaneHits_v14
-                    recoilSimHits = event.RecoilSimHits_v14
+                    TargetScoringPlaneHits = event.TargetScoringPlaneHits_v14
+                    RecoilSimHits = event.RecoilSimHits_v14
 
 
                 evt = []
@@ -80,18 +78,17 @@ class sampleContainer:
                         if track_id == 0 and it.second.getPdgID() == -11:
                             decayz = it.second.getVertex()[2]
 
-                for hit in ecalRecHits:
+                for hit in EcalRecHits:
                     Etot += hit.getEnergy()
                     if hit.getZPos() < 500:
                         Eupstream += hit.getEnergy()
                     else:
                         Edownstream += hit.getEnergy()
 
-                for hit in hcalRecHits:
+                for hit in HcalRecHits:
                     if hit.getZPos() >= 870:
                         EHcal += 12.2*hit.getEnergy()
 
-                h0.Fill(decayz)
                 if Eupstream < 1500:
                     h1.Fill(decayz)
 
@@ -101,7 +98,7 @@ class sampleContainer:
                     trackerLayerZs = [9.5, 15.5, 24.5, 30.5, 39.5, 45.5, 54.5, 60.5, 93.5, 95.5, 183.5, 185.5]
                     trackerLayersHit = np.zeros(12)
                     trackerHits = np.zeros(6)
-                    for hit in recoilSimHits:
+                    for hit in RecoilSimHits:
                         for it in SimParticles:
                             if it.first == hit.getTrackID():
                                 if it.second.getCharge() != 0:
@@ -126,7 +123,7 @@ class sampleContainer:
                             trackinLayer += 1
 
                     recoil_E = 0
-                    for sphit in targetScoringPlaneHits:
+                    for sphit in TargetScoringPlaneHits:
                         if sphit.getPosition()[2] > 0:
                             for it in SimParticles:
                                 if it.first == sphit.getTrackID():
@@ -163,7 +160,7 @@ class sampleContainer:
                         hcal_meangammaproj = 0;
                     
                         for it in SimParticles:
-                            for sphit in targetScoringPlaneHits:
+                            for sphit in TargetScoringPlaneHits:
                                 if sphit.getPosition()[2] > 0:
                                     if it.first == sphit.getTrackID():
                                         if sphit.getPdgID() == 11 and 0 in it.second.getParents():
@@ -179,7 +176,7 @@ class sampleContainer:
                         downstreamE_within3 = 0
                     
                         #ECAL
-                        for hit in ecalRecHits:
+                        for hit in EcalRecHits:
                             hits += 1
                             x = hit.getXPos()
                             y = hit.getYPos()
@@ -216,7 +213,7 @@ class sampleContainer:
                                 Eupstream += energy
 
                             closestpoint = 9999
-                            for hit2 in ecalRecHits:
+                            for hit2 in EcalRecHits:
                                 if abs(z - hit2.getZPos()) < 1:
                                     isolation = math.sqrt((x-hit2.getXPos())**2 + (y-hit2.getYPos())**2)
                                     if isolation > 1 and isolation < closestpoint:
@@ -231,7 +228,7 @@ class sampleContainer:
                         downstreamrmean_gammaproj /= Edownstream 
 
                         #ECAL standard deviation
-                        for hit in ecalRecHits:
+                        for hit in EcalRecHits:
                             x = hit.getXPos()
                             y = hit.getYPos()
                             z = hit.getZPos()
@@ -246,7 +243,7 @@ class sampleContainer:
                         zstd = math.sqrt(zstd/Etot)
                     
                         #HCAL
-                        for hit in hcalRecHits:
+                        for hit in HcalRecHits:
                             hits_h += 1
                             x = hit.getXPos()
                             y = hit.getYPos()
@@ -265,7 +262,7 @@ class sampleContainer:
                         
                             #isolated hits tracking
                             closestpoint = 9999
-                            for hit2 in hcalRecHits:
+                            for hit2 in HcalRecHits:
                                 if abs(z - hit2.getZPos()) < 1:
                                     sepx = math.sqrt((x-hit2.getXPos())**2)
                                     sepy = math.sqrt((y-hit2.getYPos())**2)
@@ -285,7 +282,7 @@ class sampleContainer:
                         hcal_meangammaproj /= EHcal
                     
                         #HCAL standard deviation
-                        for hit in hcalRecHits:
+                        for hit in HcalRecHits:
                             x = hit.getXPos()
                             y = hit.getYPos()
                             z = hit.getZPos()
@@ -302,8 +299,6 @@ class sampleContainer:
 
                         evt.append(Etot) #0
                         evt.append(Eupstream) #1
-                        #evt.append(Edownstream)
-                        #evt.append(hits)
                         evt.append(downstreamhits) #2
                         evt.append(isohits) #3
                         evt.append(isoE)  #4
@@ -325,9 +320,56 @@ class sampleContainer:
                         
                         if bdt.predict(xgb.DMatrix(np.vstack((evt,np.zeros_like(evt))),np.zeros(2)))[0] >= 0.99993:
                             h4.Fill(decayz)
-                            print(filename)
-                                
-                        evtcount += 1
+                            evtcount += 1
+
+                            ecalrechits = []
+                            for hit in EcalRecHits:
+                                ecalrechits.append([[hit.getXPos(), hit.getYPos(), hit.getZPos()],
+                                                    hit.getEnergy()])
+
+                            hcalrechits = []
+                            for hit in HcalRecHits:
+                                hcalrechits.append([[hit.getXPos(), hit.getYPos(), hit.getZPos()],
+                                                    hit.getEnergy()])
+
+                            simparticles = []
+                            for it in SimParticles:
+                                daughters = []
+                                for daughter in it.second.getDaughters():
+                                    daughters.append(daughter)
+                                parents = []
+                                for parent in it.second.getParents():
+                                    parents.append(parent)
+
+                                simparticles.append([it.first,
+                                                     it.second.getEnergy(),
+                                                     it.second.getPdgID(),
+                                                     [it.second.getVertex()[0], it.second.getVertex()[1], it.second.getVertex()[2]],
+                                                     [it.second.getEndPoint()[0], it.second.getEndPoint()[1], it.second.getEndPoint()[2]],
+                                                     [it.second.getMomentum()[0], it.second.getMomentum()[1], it.second.getMomentum()[2]],
+                                                     it.second.getMass(),
+                                                     it.second.getCharge(),
+                                                     daughters,
+                                                     parents])
+
+                            targetscoringplanehits = []
+                            for sphit in TargetScoringPlaneHits:
+                                targetscoringplanehits.append([[sphit.getPosition()[0], sphit.getPosition()[1], sphit.getPosition()[2]],
+                                                               sphit.getEnergy(),
+                                                               [sphit.getMomentum()[0], sphit.getMomentum()[1], sphit.getMomentum()[2]],
+                                                               sphit.getTrackID(),
+                                                               sphit.getPdgID()])
+
+                            eventinfo = {'EcalRecHits': ecalrechits,
+                                         'HcalRecHits': hcalrechits,
+                                         'SimParticles': simparticles,
+                                         'TargetScoringPlaneHits': targetscoringplanehits}
+
+                            with open(EDPath + 'eventinfo_{0}.txt'.format(evtcount), 'w') as convert_file:
+                                convert_file.write(json.dumps(eventinfo))
+
+                            print("Wrote event {0} to file".format(evtcount))
+
 
         """
         h0.Sumw2()
