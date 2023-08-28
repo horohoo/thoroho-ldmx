@@ -45,7 +45,7 @@ class sampleContainer:
             fn = os.path.join(dn, filename)
             tree = EventTree.EventTree(fn)
             for event in tree:
-                
+
                 if isBkg:
                     EcalRecHits = event.EcalRecHits_sim
                     HcalRecHits = event.HcalRecHits_sim
@@ -83,17 +83,16 @@ class sampleContainer:
 
                 if Eupstream < 1500 and Edownstream < 2500 and EHcal >= 2500:
                     h2.Fill(1)
-                ######################################################################################################                       
 
-                trackerLayerZs = [9.5, 15.5, 24.5, 30.5, 39.5, 45.5, 54.5, 60.5, 93.5, 95.5, 183.5, 185.5]
-                trackerLayersHit = np.zeros(12)
-                trackerHits = np.zeros(6)
-                for hit in RecoilSimHits:
-                    p = math.sqrt((hit.getMomentum()[0])**2 + (hit.getMomentum()[1])**2 + (hit.getMomentum()[2])**2)
-                    if p >= 50:
-                        for i in range(12):
-                            if abs(hit.getPosition()[2] - trackerLayerZs[i]) < 1:
-                                trackerLayersHit[i] += 1
+                    trackerLayerZs = [9.5, 15.5, 24.5, 30.5, 39.5, 45.5, 54.5, 60.5, 93.5, 95.5, 183.5, 185.5]
+                    trackerLayersHit = np.zeros(12)
+                    trackerHits = np.zeros(6)
+                    for hit in RecoilSimHits:
+                        p = math.sqrt((hit.getMomentum()[0])**2 + (hit.getMomentum()[1])**2 + (hit.getMomentum()[2])**2)
+                        if p >= 50:
+                            for i in range(12):
+                                if abs(hit.getPosition()[2] - trackerLayerZs[i]) < 1:
+                                    trackerLayersHit[i] += 1
                     for i in range(6):
                         hit1count = trackerLayersHit[2*i]
                         hit2count = trackerLayersHit[2*i+1]
@@ -232,7 +231,7 @@ class sampleContainer:
                         evt.append(Etot)
                         evt.append(downstreamrmean_gammaproj)
                             
-                        
+
                         if bdt.predict(xgb.DMatrix(np.vstack((evt,np.zeros_like(evt))),np.zeros(2)))[0] > 0.99998:
                             h4.Fill(1)
                             evtcount += 1
