@@ -406,7 +406,7 @@ class sampleContainer:
         #h0.Draw()
         #c0.Print(EDPath + "totalevents.root")
         #del c0
-        del h0
+        #del h0
         c1.cd()
         h1.Draw()
         c1.Print(EDPath + "passtrigger.root")
@@ -443,20 +443,6 @@ if __name__ == '__main__':
 
     (options, args) = parser.parse_args()
 
-    adds = 0
-    Check = True
-    while Check:
-        if not os.path.exists(options.out_dir+'_'+str(adds)):
-            try:
-                os.makedirs(options.out_dir+'_'+str(adds))
-                Check = False
-            except:
-                Check = True
-        else:
-            adds += 1
-
-
-    print("You set max_evt = ", options.max_evt)
 
     # load bdt model from pkl file
     gbm = pkl.load(open(options.bdt_path, 'rb'))
