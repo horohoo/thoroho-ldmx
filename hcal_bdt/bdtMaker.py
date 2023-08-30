@@ -67,29 +67,22 @@ class sampleContainer:
                 if Eupstream < 1500 and E_hcal >= 2500 and Edownstream < 2500 :
 
                     hits = 0
-                    downstreamhits = 0
-                    widedownstreamhits = 0
-                    rsqarr = []
-                    zsqarr=[]
-                    xarr = []
-                    yarr = []
-                    zarr = []
                     isohits = 0
                     isoE = 0
-                    Eupstream = 0
+
                     xmean=0
                     ymean=0
                     zmean=0
+
                     xstd=0
                     ystd=0
                     zstd=0
                     
-                  
                     Etot = 0
-                    centralE=0
                     layershit = []
+
                     for it in SimParticles:
-                        for sphit in targetScoringPlaneHits:
+                        for sphit in TargetScoringPlaneHits:
                             if sphit.getPosition()[2] > 0:
                                 if it.first == sphit.getTrackID():
                                     if sphit.getPdgID() == 11 and 0 in it.second.getParents():
@@ -103,15 +96,11 @@ class sampleContainer:
                         x = hit.getXPos()
                         y = hit.getYPos()
                         z = hit.getZPos()
-                        r = math.sqrt(x*x + y*y)
                         energy = hit.getEnergy()
-                        xarr.append(x)
-                        yarr.append(y)
-                        zarr.append(z)
                         Etot += energy
-                        rsqarr.append(r*r)
-                        zsqarr.append(z*z)
-                        
+
+                        if not z in layershit:
+                            layershit.append(z)
                         
                         xmean += x*energy
                         ymean += y*energy
@@ -123,14 +112,14 @@ class sampleContainer:
                         downstreamrmean_gammaproj += projdist*energy
                         
                         closestpoint = 9999
-                        for hit2 in event.HcalRecHits_v12:
+                        for hit2 in HcalRecHits:
                             if abs(z - hit2.getZPos()) < 1:
                                 sepx = math.sqrt((x-hit2.getXPos())**2)
                                 sepy = math.sqrt((y-hit2.getYPos())**2)
-                                if sepx > 0 and sepx%50 == 0:
+                                if sepx > 0 and sepx%50 < 0.01:
                                     if sepx < closestpoint:
                                         closestpoint = sepx
-                                elif sepy > 0 and sepy%50 == 0:
+                                elif sepy > 0 and sepy%50 < 0.01:
                                     if sepy < closestpoint:
                                         closestpoint = sepy
                         if closestpoint > 50:
@@ -143,7 +132,7 @@ class sampleContainer:
                         
                     downstreamrmean_gammaproj /= Etot    
                      
-                    for hit in hcalRecHits:
+                    for hit in HcalRecHits:
                         x = hit.getXPos()
                         y = hit.getYPos()
                         z = hit.getZPos()
@@ -157,27 +146,24 @@ class sampleContainer:
                     ystd = math.sqrt(ystd/Etot)
                     zstd = math.sqrt(zstd/Etot)
     
-
-
                     # Fill event with features to train BDT
-                    evt.append(math.sqrt(np.mean(rsqarr))) #0
-                    evt.append(math.sqrt(np.mean(zsqarr))) #1
                   
-                    evt.append(xstd) #2
-                    evt.append(ystd) #3
-                    evt.append(zstd) #4
+                    evt.append(xstd) #0
+                    evt.append(ystd) #1
+                    evt.append(zstd) #2
                                
-                    evt.append(np.std(zarr)) #5
-                    evt.append(np.std(xarr)) #6
-                    evt.append(np.std(yarr)) #7
+                    evt.append(xmean) #3
+                    evt.append(ymean) #4
                     
-                    evt.append(isohits) #8
-                    evt.append(isoE) #9
-                    evt.append(hits) #10
+                    evt.append(isohits) #5
+                    evt.append(isoE) #6
+                    evt.append(hits) #7
                     
-                    evt.append(Etot) #11
+                    evt.append(Etot) #8
                     
-                    evt.append(downstreamrmean_gammaproj) #12
+                    evt.append(downstreamrmean_gammaproj) #9
+
+                    evt.append(len(layershit)) #10
 
                     self.events.append(evt)
                     evtcount += 1
@@ -316,4 +302,4 @@ if __name__ == '__main__':
     xgb.plot_importance(gbm)
     plt.pyplot.savefig(options.out_name+'_'+str(adds)+'/'+options.out_name+'_'+str(adds)+'_fimportance.png', dpi=500, bbox_inches='tight', pad_inches=0.5)
 
-    print("Files saved in: ", options.out_name+'_trial3'+str(adds))
+    print("Files saved in: ", options.out_name+'_'+str(adds))
