@@ -1,5 +1,3 @@
-#New energy contraint, redo bdtmaker with constraints and variables,redo isohits and add z density etc
-
 import argparse
 import importlib
 import os
@@ -52,6 +50,7 @@ class sampleContainer:
                     SimParticles = event.SimParticles_sim
                     TargetScoringPlaneHits = event.TargetScoringPlaneHits_sim
                     RecoilSimHits = event.RecoilSimHits_sim
+                    EcalVeto = event.EcalVeto_sim
 
                 else:
                     EcalRecHits = event.EcalRecHits_v14
@@ -59,6 +58,7 @@ class sampleContainer:
                     SimParticles = event.SimParticles_v14
                     TargetScoringPlaneHits = event.TargetScoringPlaneHits_v14
                     RecoilSimHits = event.RecoilSimHits_v14
+                    EcalVeto = event.EcalVeto_v14
                     
  
                 evt = []
@@ -274,10 +274,17 @@ class sampleContainer:
                                                                sphit.getTrackID(),
                                                                sphit.getPdgID()])
 
+                            ecalveto = []
+                            ecalveto.append(EcalVeto.getDisc(),
+                                            EcalVeto.getNStraightTracks(),
+                                            EcalVeto.getNLinRegTracks()]
+
+
                             eventinfo = {'EcalRecHits': ecalrechits,
                                          'HcalRecHits': hcalrechits,
                                          'SimParticles': simparticles,
-                                         'TargetScoringPlaneHits': targetscoringplanehits}
+                                         'TargetScoringPlaneHits': targetscoringplanehits,
+                                         'EcalVeto': ecalveto}
 
                             with open(EDPath + 'eventinfo_{0}.txt'.format(evtcount), 'w') as convert_file:
                                 convert_file.write(json.dumps(eventinfo))
