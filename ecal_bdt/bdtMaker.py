@@ -240,11 +240,11 @@ if __name__ == '__main__':
     parser = OptionParser()
 
     parser.add_option('--seed', dest='seed', type='int', default=2, help='Numpy random seed.')
-    parser.add_option('--train_frac', dest='train_frac', default=0.99, help='Fraction of events to use for training')
+    parser.add_option('--train_frac', dest='train_frac', default=0.01, help='Fraction of events to use for training')
     parser.add_option('--max_evt', dest='max_evt', type='int', default=450000, help='Max Events to load')
     parser.add_option('--out_name', dest='out_name', default='bdt_v3.1', help='Output Pickle Name')
     parser.add_option('--out_dir', dest='out_dir', default='bdt_v3.1', help='Output directory')
-    parser.add_option('--bdt_path', dest='bdt_path', default='/sfs/qumulo/qhome/tgh7hx/ldmx/bdt_v6_weights.pkl', help='BDT model to load in')
+    parser.add_option('--bdt_path', dest='bdt_path', default='/sfs/qumulo/qhome/tgh7hx/ldmx/bdt_v3.1_1/bdt_v3.1_1_weights.pkl', help='BDT model to load in')
     """
     Note on --bdt_path option: this is only used after training a BDT model on
     a combined signal sample for different signal masses. After training, I
@@ -255,7 +255,7 @@ if __name__ == '__main__':
     parser.add_option('--eta', dest='eta', type='float', default=0.023, help='Learning Rate')
     parser.add_option('--tree_number', dest='tree_number', type='int', default=1000, help='Tree Number')
     parser.add_option('--depth', dest='depth', type='int', default=20, help='Max Tree Depth')
-    parser.add_option('--bkg_dir', dest='bkg_dir', default='/scratch/tgh7hx/v3.2.0_ecalPN_tskim-batch1/', help='name of background file directory')
+    parser.add_option('--bkg_dir', dest='bkg_dir', default='/scratch/tgh7hx/v3.2.0_ecalPN_tskim-batch2/', help='name of background file directory')
     parser.add_option('--sig_dir', dest='sig_dir', default='/scratch/tgh7hx/signal_train/', help='name of signal file directory')
 
 
@@ -312,8 +312,8 @@ if __name__ == '__main__':
 
     num_trees = options.tree_number
     evallist = [(eventContainer.dtest,'eval'), (eventContainer.dtrain,'train')]
-    gbm = xgb.train(params, eventContainer.dtrain, num_trees, evallist) # use this option for training a new bdt
-    #gbm = pkl.load(open(options.bdt_path, 'rb')) # use this option for testing on a previously trained bdt
+    #gbm = xgb.train(params, eventContainer.dtrain, num_trees, evallist) # use this option for training a new bdt
+    gbm = pkl.load(open(options.bdt_path, 'rb')) # use this option for testing on a previously trained bdt
 
     preds = gbm.predict(eventContainer.dtest)
     fpr, tpr, threshold = metrics.roc_curve(eventContainer.test_y, preds)
