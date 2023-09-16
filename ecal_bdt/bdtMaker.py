@@ -82,9 +82,14 @@ class sampleContainer:
                         for sphit in targetScoringPlaneHits:
                             if sphit.getPosition()[2] > 0:
                                 if it.first == sphit.getTrackID():
-                                    if sphit.getPdgID() == 11 and 0 in it.second.getParents():
-                                        x0_gamma = sphit.getPosition()
-                                        p_gamma = [-sphit.getMomentum()[0], -sphit.getMomentum()[1], 4000 - sphit.getMomentum()[2]]
+                                    if isBkg:
+                                        if sphit.getPdgID() == 11 and 0 in it.second.getParents():
+                                            x0_gamma = sphit.getPosition()
+                                            p_gamma = [-sphit.getMomentum()[0], -sphit.getMomentum()[1], 4000 - sphit.getMomentum()[2]]
+                                    else:
+                                        if sphit.getPdgID() == 622:
+                                            x0_gamma = sphit.getPosition()
+                                            p_gamma = sphit.getMomentum
                     downstreamrmean_gammaproj = 0
                     downstreamhits_within1 = 0
                     downstreamhits_within2 = 0
