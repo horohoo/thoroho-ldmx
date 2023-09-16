@@ -89,7 +89,7 @@ class sampleContainer:
                                     else:
                                         if sphit.getPdgID() == 622:
                                             x0_gamma = sphit.getPosition()
-                                            p_gamma = sphit.getMomentum
+                                            p_gamma = sphit.getMomentum()
                     downstreamrmean_gammaproj = 0
                     downstreamhits_within1 = 0
                     downstreamhits_within2 = 0
@@ -242,8 +242,8 @@ if __name__ == '__main__':
     parser.add_option('--seed', dest='seed', type='int', default=2, help='Numpy random seed.')
     parser.add_option('--train_frac', dest='train_frac', default=0.99, help='Fraction of events to use for training')
     parser.add_option('--max_evt', dest='max_evt', type='int', default=450000, help='Max Events to load')
-    parser.add_option('--out_name', dest='out_name', default='bdt', help='Output Pickle Name')
-    parser.add_option('--out_dir', dest='out_dir', default='bdt', help='Output directory')
+    parser.add_option('--out_name', dest='out_name', default='bdt_v3.1', help='Output Pickle Name')
+    parser.add_option('--out_dir', dest='out_dir', default='bdt_v3.1', help='Output directory')
     parser.add_option('--bdt_path', dest='bdt_path', default='/sfs/qumulo/qhome/tgh7hx/ldmx/bdt_v6_weights.pkl', help='BDT model to load in')
     """
     Note on --bdt_path option: this is only used after training a BDT model on
