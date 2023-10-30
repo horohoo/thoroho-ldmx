@@ -133,169 +133,175 @@ class sampleContainer:
                     if trackinLayer >= 4 and multiTrackinLayer < 4 and recoil_E > 50 and recoil_E < 1200:
                         h3.Fill(1)
 
-                        hits = 0
-                        downstreamhits = 0
-                        xmean = 0
-                        xstd = 0
-                        ymean = 0
-                        ystd = 0
-                        zmean = 0
-                        zstd = 0
-                        isohits = 0
-                        isoE = 0
-                        layershit = []
-                        for sphit in TargetScoringPlaneHits:
-                            if sphit.getPosition()[2] > 0:
-                                for it in SimParticles:
-                                    if it.first == sphit.getTrackID():
-                                        if isBkg:
-                                            if sphit.getPdgID() == 11 and 0 in it.second.getParents():
-                                                x0_gamma = sphit.getPosition()
-                                                p_gamma = [-sphit.getMomentum()[0], -sphit.getMomentum()[1], 4000 - sphit.getMomentum()[2]]
-                                        else:
-                                            if sphit.getPdgID() == 622:
-                                                x0_gamma = sphit.getPosition()
-                                                p_gamma = sphit.getMomentum()
-                        downstreamrmean_gammaproj = 0
-                        downstreamhits_within1 = 0
-                        downstreamhits_within2 = 0
-                        downstreamhits_within3 = 0
-                        downstreamE_within1 = 0
-                        downstreamE_within2 = 0
-                        downstreamE_within3 = 0
+                    hits = 0
+                    downstreamhits = 0
+                    xmean = 0
+                    xstd = 0
+                    ymean = 0
+                    ystd = 0
+                    zmean = 0
+                    zstd = 0
+                    isohits = 0
+                    isoE = 0
+                    layershit = []
+                    for sphit in TargetScoringPlaneHits:
+                        if sphit.getPosition()[2] > 0:
+                            for it in SimParticles:
+                                if it.first == sphit.getTrackID():
+                                    if isBkg:
+                                        if sphit.getPdgID() == 11 and 0 in it.second.getParents():
+                                            x0_gamma = sphit.getPosition()
+                                            p_gamma = [-sphit.getMomentum()[0], -sphit.getMomentum()[1], 4000 - sphit.getMomentum()[2]]
+                                    else:
+                                        if sphit.getPdgID() == 622:
+                                            x0_gamma = sphit.getPosition()
+                                            p_gamma = sphit.getMomentum()
+                    downstreamrmean_gammaproj = 0
+                    downstreamhits_within1 = 0
+                    downstreamhits_within2 = 0
+                    downstreamhits_within3 = 0
+                    downstreamE_within1 = 0
+                    downstreamE_within2 = 0
+                    downstreamE_within3 = 0
 
-                        for hit in EcalRecHits:
-                            hits += 1
-                            x = hit.getXPos()
-                            y = hit.getYPos()
-                            z = hit.getZPos()
-                            r = math.sqrt(x*x + y*y)
-                            energy = hit.getEnergy()
+                    for hit in EcalRecHits:
+                        hits += 1
+                        x = hit.getXPos()
+                        y = hit.getYPos()
+                        z = hit.getZPos()
+                        r = math.sqrt(x*x + y*y)
+                        energy = hit.getEnergy()
                                 
-                            if not z in layershit:
-                                layershit.append(z)
+                        if not z in layershit:
+                            layershit.append(z)
 
-                            xmean += x*energy
-                            ymean += y*energy
-                            zmean += z*energy
+                        xmean += x*energy
+                        ymean += y*energy
+                        zmean += z*energy
 
-                            if z > 500:
-                                downstreamhits += 1
-                                Edownstream += energy
+                        if z > 500:
+                            downstreamhits += 1
+                            Edownstream += energy
 
-                                x_proj = x0_gamma[0] + (z - x0_gamma[2])*p_gamma[0]/p_gamma[2]
-                                y_proj = x0_gamma[1] + (z - x0_gamma[2])*p_gamma[1]/p_gamma[2]
-                                projdist = math.sqrt((x-x_proj)**2 + (y-y_proj)**2)
-                                downstreamrmean_gammaproj += projdist*energy
-                                if projdist < 10:
-                                    downstreamhits_within1 += 1
-                                    downstreamE_within1 += energy
-                                if projdist < 19:
-                                    downstreamhits_within2 += 1
-                                    downstreamE_within2 += energy
-                                if projdist < 28:
-                                    downstreamhits_within3 += 1
-                                    downstreamE_within3 += energy
+                            x_proj = x0_gamma[0] + (z - x0_gamma[2])*p_gamma[0]/p_gamma[2]
+                            y_proj = x0_gamma[1] + (z - x0_gamma[2])*p_gamma[1]/p_gamma[2]
+                            projdist = math.sqrt((x-x_proj)**2 + (y-y_proj)**2)
+                            downstreamrmean_gammaproj += projdist*energy
+                            if projdist < 10:
+                                downstreamhits_within1 += 1
+                                downstreamE_within1 += energy
+                            if projdist < 19:
+                                downstreamhits_within2 += 1
+                                downstreamE_within2 += energy
+                            if projdist < 28:
+                                downstreamhits_within3 += 1
+                                downstreamE_within3 += energy
                                     
-                            else:
-                                Eupstream += energy
+                        else:
+                            Eupstream += energy
 
-                            closestpoint = 9999
-                            for hit2 in EcalRecHits:
-                                if abs(z - hit2.getZPos()) < 1:
-                                    isolation = math.sqrt((x-hit2.getXPos())**2 + (y-hit2.getYPos())**2)
-                                    if isolation > 1 and isolation < closestpoint:
-                                        closestpoint = isolation
-                            if closestpoint > 9:
-                                isohits += 1
-                                isoE += energy
+                        closestpoint = 9999
+                        for hit2 in EcalRecHits:
+                            if abs(z - hit2.getZPos()) < 1:
+                                isolation = math.sqrt((x-hit2.getXPos())**2 + (y-hit2.getYPos())**2)
+                                if isolation > 1 and isolation < closestpoint:
+                                    closestpoint = isolation
+                        if closestpoint > 9:
+                            isohits += 1
+                            isoE += energy
 
-                        xmean /= Etot
-                        ymean /= Etot
-                        zmean /= Etot
-                        downstreamrmean_gammaproj /= Edownstream
+                    xmean /= Etot
+                    ymean /= Etot
+                    zmean /= Etot
+                    downstreamrmean_gammaproj /= Edownstream
 
-                        for hit in EcalRecHits:
-                            xstd += energy*(xmean-hit.getXPos())**2
-                            ystd += energy*(ymean-hit.getYPos())**2
-                            zstd += energy*(zmean-hit.getZPos())**2
+                    for hit in EcalRecHits:
+                        xstd += energy*(xmean-hit.getXPos())**2
+                        ystd += energy*(ymean-hit.getYPos())**2
+                        zstd += energy*(zmean-hit.getZPos())**2
 
 
-                        evt.append(Etot)
-                        evt.append(Eupstream)
-                        evt.append(Edownstream)
-                        evt.append(hits)
-                        evt.append(downstreamhits)
-                        evt.append(isohits)
-                        evt.append(isoE)
-                        evt.append(xmean)
-                        evt.append(ymean)
-                        evt.append(xstd)
-                        evt.append(ystd)
-                        evt.append(zstd)
-                        evt.append(downstreamrmean_gammaproj)
-                        evt.append(downstreamhits_within1)
-                        evt.append(downstreamhits_within2)
-                        evt.append(downstreamhits_within3)
-                        evt.append(downstreamE_within1)
-                        evt.append(downstreamE_within2)
-                        evt.append(downstreamE_within3)
-                        evt.append(len(layershit))
+                    evt.append(Etot)
+                    evt.append(Eupstream)
+                    evt.append(Edownstream)
+                    evt.append(hits)
+                    evt.append(downstreamhits)
+                    evt.append(isohits)
+                    evt.append(isoE)
+                    evt.append(xmean)
+                    evt.append(ymean)
+                    evt.append(xstd)
+                    evt.append(ystd)
+                    evt.append(zstd)
+                    evt.append(downstreamrmean_gammaproj)
+                    evt.append(downstreamhits_within1)
+                    evt.append(downstreamhits_within2)
+                    evt.append(downstreamhits_within3)
+                    evt.append(downstreamE_within1)
+                    evt.append(downstreamE_within2)
+                    evt.append(downstreamE_within3)
+                    evt.append(len(layershit))
 
                         
-                        if bdt.predict(xgb.DMatrix(np.vstack((evt,np.zeros_like(evt))),np.zeros(2)))[0] >= 0.999971:
-                            h4.Fill(1)
-                            evtcount += 1
+                    if bdt.predict(xgb.DMatrix(np.vstack((evt,np.zeros_like(evt))),np.zeros(2)))[0] >= 0.999971:
+                        h4.Fill(1)
+                        evtcount += 1
 
-                            ecalrechits = []
-                            for hit in EcalRecHits:
-                                ecalrechits.append([[hit.getXPos(), hit.getYPos(), hit.getZPos()],
-                                                    hit.getEnergy()])
+                        ecalrechits = []
+                        for hit in EcalRecHits:
+                            ecalrechits.append([[hit.getXPos(), hit.getYPos(), hit.getZPos()],
+                                                hit.getEnergy()])
 
-                            hcalrechits = []
-                            for hit in HcalRecHits:
-                                hcalrechits.append([[hit.getXPos(), hit.getYPos(), hit.getZPos()],
-                                                    hit.getEnergy()])
+                        hcalrechits = []
+                        for hit in HcalRecHits:
+                            hcalrechits.append([[hit.getXPos(), hit.getYPos(), hit.getZPos()],
+                                                hit.getEnergy()])
 
-                            simparticles = []
-                            for it in SimParticles:
-                                daughters = []
-                                for daughter in it.second.getDaughters():
-                                    daughters.append(daughter)
-                                parents = []
-                                for parent in it.second.getParents():
-                                    parents.append(parent)
+                        simparticles = []
+                        for it in SimParticles:
+                            daughters = []
+                            for daughter in it.second.getDaughters():
+                                daughters.append(daughter)
+                            parents = []
+                            for parent in it.second.getParents():
+                                parents.append(parent)
 
-                                simparticles.append([it.first, 
-                                                     it.second.getEnergy(),
-                                                     it.second.getPdgID(),
-                                                     [it.second.getVertex()[0], it.second.getVertex()[1], it.second.getVertex()[2]],
-                                                     [it.second.getEndPoint()[0], it.second.getEndPoint()[1], it.second.getEndPoint()[2]],
-                                                     [it.second.getMomentum()[0], it.second.getMomentum()[1], it.second.getMomentum()[2]],
-                                                     it.second.getMass(),
-                                                     it.second.getCharge(),
-                                                     daughters,
-                                                     parents])
+                            simparticles.append([it.first, 
+                                                 it.second.getEnergy(),
+                                                 it.second.getPdgID(),
+                                                 [it.second.getVertex()[0], it.second.getVertex()[1], it.second.getVertex()[2]],
+                                                 [it.second.getEndPoint()[0], it.second.getEndPoint()[1], it.second.getEndPoint()[2]],
+                                                 [it.second.getMomentum()[0], it.second.getMomentum()[1], it.second.getMomentum()[2]],
+                                                 it.second.getMass(),
+                                                 it.second.getCharge(),
+                                                 daughters,
+                                                 parents])
 
-                            targetscoringplanehits = []
-                            for sphit in TargetScoringPlaneHits:
-                                targetscoringplanehits.append([[sphit.getPosition()[0], sphit.getPosition()[1], sphit.getPosition()[2]],
-                                                               sphit.getEnergy(),
-                                                               [sphit.getMomentum()[0], sphit.getMomentum()[1], sphit.getMomentum()[2]],
-                                                               sphit.getTrackID(),
-                                                               sphit.getPdgID()])
+                        targetscoringplanehits = []
+                        for sphit in TargetScoringPlaneHits:
+                            targetscoringplanehits.append([[sphit.getPosition()[0], sphit.getPosition()[1], sphit.getPosition()[2]],
+                                                           sphit.getEnergy(),
+                                                           [sphit.getMomentum()[0], sphit.getMomentum()[1], sphit.getMomentum()[2]],
+                                                           sphit.getTrackID(),
+                                                           sphit.getPdgID()])
 
 
-                            eventinfo = {'EcalRecHits': ecalrechits,
-                                         'HcalRecHits': hcalrechits,
-                                         'SimParticles': simparticles,
-                                         'TargetScoringPlaneHits': targetscoringplanehits}
+                        recoilsimhits = []
+                        for hit in RecoilSimHits:
+                            recoilsimhits.append([[hit.getPosition()[0], hit.getPosition()[1], hit.getPosition()[2]],
+                                                  [hit.getMomentum()[0], hit.getMomentum()[1], hit.getMomentum()[2]]])
+
+                        eventinfo = {'EcalRecHits': ecalrechits,
+                                     'HcalRecHits': hcalrechits,
+                                     'SimParticles': simparticles,
+                                     'TargetScoringPlaneHits': targetscoringplanehits,
+                                     'RecoilSimHits': recoilsimhits}
 
                             
-                            with open(EDPath + 'eventinfo_{0}.txt'.format(evtcount), 'w') as convert_file:
-                                convert_file.write(json.dumps(eventinfo))
+                        with open(EDPath + 'eventinfo_{0}.txt'.format(evtcount), 'w') as convert_file:
+                            convert_file.write(json.dumps(eventinfo))
                             
-                            print("Wrote event {0} to file".format(evtcount))
+                        print("Wrote event {0} to file".format(evtcount))
             
                             
         
@@ -345,4 +351,4 @@ if __name__ == '__main__':
     gbm = pkl.load(open(options.bdt_path, 'rb'))
 
     print('Loading bkg_file = ', options.bkg_dir)
-    bkgContainer = sampleContainer(options.sig_dir, options.evtdisplay_path, False, gbm)
+    bkgContainer = sampleContainer(options.bkg_dir, options.evtdisplay_path, True, gbm)
