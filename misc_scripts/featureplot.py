@@ -48,7 +48,7 @@ histoname = ["Etot", "Eupstream", "Edownstream", "hits", "downstreamhits", "isoh
 
 axistitle = ["Total energy [MeV]", "Upstream energy [MeV]", "Downstream energy [MeV]", "Number of readout hits", "Downstream hits", "Isolated hits", "Isolated enrgy [MeV]", "Mean x [mm]", "Mean y [mm]", "Std. dev. x [mm]", "Std. dev. y [mm]", "Std. dev. z [mm]", "Mean distance of downstream hits from photon trajectory line [mm]", "Downstream hits within 1 cell width of photon trajectory", "Downstream hits within 2 cell widths of photon trajectory", "Downstream hits within 3 cell widths of photon trajectory", "Downstream energy within 1 cell width of photon trajectory [MeV]", "Downstream energy within 2 cell widths of photon trajectory [MeV]", "Downstream energy within 3 cell widths of photon trajectory [MeV]", "Number of layers hit", "Mean x (unweighted) [mm]", "Mean y (unweighted) [mm]", "Std. dev. x (unweighted) [mm]", "Std. dev. y (unweighted) [mm]", "Std. dev. z (unweighted) [mm]"]
 
-axisrange = [[2400,5000], [0,2000], [2400,5000], [0,130], [0,100], [0,60], [0,4000], [-300,300], [-300,300], [0,180], [0,180], [0,300], [0,350], [0,70], [0,70], [0,70], [0,4000], [0,4000], [0,4000], [0,40], [-300,300], [-300,300], [0,180], [0,180], [0,300]]
+axisrange = [[2400,5000], [0,2000], [2400,5000], [0,130], [0,100], [0,60], [0,4000], [-300,300], [-300,300], [0,180], [0,180], [0,300], [0,350], [0,70], [0,70], [0,70], [0,4000], [0,4000], [0,4000], [0,36], [-300,300], [-300,300], [0,180], [0,180], [0,300]]
 
 for i in range(len(histoname)):
     print("Now plotting feature", histoname[i])
@@ -89,7 +89,10 @@ for i in range(len(histoname)):
     h1.GetYaxis().SetTitle("A.U.")
 
     # legend that maybe needs to move for each variable plotted
-    legend = TLegend(.63,.68,.97,.89)#.63,.66,.97,.87)
+    if "layershit" in histoname[i]:
+        legend = TLegend(.13,.71,.47,.92)
+    else:
+        legend = TLegend(.66,.68,1.00,.89)#.63,.68,.97,.89)
     legend.SetBorderSize(0)
     legend.SetFillColor(0)
     legend.SetFillStyle(0)
