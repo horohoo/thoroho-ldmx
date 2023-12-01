@@ -34,15 +34,17 @@ class sampleContainer:
         self.events = []
         evtcount = 0
 
+        c0 = TCanvas()
         c1 = TCanvas()
         c2 = TCanvas()
         c3 = TCanvas()
         c4 = TCanvas()
         
-        h1 = TH1F("passtrigger", "passtrigger", 100, 0, 1000)
-        h2 = TH1F("passEnergyReq", "passEnergyReq", 100, 0, 1000)
-        h3 = TH1F("passTrackerVeto", "passTrackerVeto", 100, 0, 1000)
-        h4 = TH1F("passBDT", "passBDT", 100, 0, 1000)
+        h0 = TH1F("totalevents", "totalevents", 200, 0, 2000)
+        h1 = TH1F("passtrigger", "passtrigger", 200, 0, 2000)
+        h2 = TH1F("passEnergyReq", "passEnergyReq", 200, 0, 2000)
+        h3 = TH1F("passTrackerVeto", "passTrackerVeto", 200, 0, 2000)
+        h4 = TH1F("passBDT", "passBDT", 200, 0, 2000)
         
         
         for filename in os.listdir(dn):
@@ -89,6 +91,7 @@ class sampleContainer:
                     if hit.getZPos() >= 870:
                         EHcal += 12.2*hit.getEnergy()
 
+                h0.Fill(decayz)
                 if Eupstream < 1500:
                     h1.Fill(decayz)
 
@@ -372,11 +375,12 @@ class sampleContainer:
                                      'TargetScoringPlaneHits': targetscoringplanehits,
                                      'RecoilSimHits': recoilsimhits}
 
+                        """
                         with open(EDPath + 'eventinfo_{0}.txt'.format(evtcount), 'w') as convert_file:
                             convert_file.write(json.dumps(eventinfo))
 
                         print("Wrote event {0} to file".format(evtcount))
-
+                        """
 
         """
         h0.Sumw2()
@@ -409,11 +413,11 @@ class sampleContainer:
                     h4.SetBinError(i, error)
         """
         
-        #c0.cd()
-        #h0.Draw()
-        #c0.Print(EDPath + "totalevents.root")
-        #del c0
-        #del h0
+        c0.cd()
+        h0.Draw()
+        c0.Print(EDPath + "totalevents.root")
+        del c0
+        del h0
         c1.cd()
         h1.Draw()
         c1.Print(EDPath + "passtrigger.root")
@@ -441,12 +445,12 @@ if __name__ == '__main__':
 
     parser = OptionParser()
 
-    parser.add_option('--max_evt', dest='max_evt', type='int', default=450000, help='Max Events to load')
     parser.add_option('--out_dir', dest='out_dir', default='testing', help='Output directory')
-    parser.add_option('--bdt_path', dest='bdt_path', default='/sdf/home/h/horoho/ldmx/inter_bdt_weights.pkl', help='BDT model to use')
+    parser.add_option('--bdt_path', dest='bdt_path', default='/sfs/qumulo/qhome/tgh7hx/ldmx/inter_bdt_weights.pkl', help='BDT model to use')
     parser.add_option('--evtdisplay_path', dest='evtdisplay_path', default='/sfs/qumulo/qhome/wer2ct/LDMX/ldmx-analysis/bdt_plots/signaleffs/5MeV_', help='lol')
-    parser.add_option('--bkg_dir', dest='bkg_dir', default='/project/hep_aag/ldmx/ap/visibles/produced/v14/mAp_005', help='name of background file directory')
+    parser.add_option('--sig_dir', dest='sig_dir', default='/project/hep_aag/ldmx/ap/visibles/produced/v14/mAp_005', help='name of signal file directory')
 
+    parser.add_options('--bkg_dir', dest='bkg_dir', default='/project/hep_aag/ldmx/ap/visibles/produced/v14/mAp_005', help='name of background file directory')
 
     (options, args) = parser.parse_args()
 
@@ -454,7 +458,5 @@ if __name__ == '__main__':
     # load bdt model from pkl file
     gbm = pkl.load(open(options.bdt_path, 'rb'))
 
-    isbkg = True
-
-    print('Loading bkg_file = ', options.bkg_dir)
-    bkgContainer = sampleContainer(options.bkg_dir, options.evtdisplay_path, isbkg, gbm)
+    print('Loading sig_file = ', options.sig_dir)
+    bkgContainer = sampleContainer(options.sig_dir, options.evtdisplay_path, False, gbm)

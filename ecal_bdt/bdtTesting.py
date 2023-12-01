@@ -42,11 +42,11 @@ class sampleContainer:
         c3 = TCanvas()
         c4 = TCanvas()
         
-        h0 = TH1F("totalevents", "totalevents", 3, 0, 2)
-        h1 = TH1F("passtrigger", "passtrigger", 3, 0, 2)
-        h2 = TH1F("ecalEnergyReq", "ecalEnergyReq", 3, 0, 2)
-        h3 = TH1F("passTrackerVeto", "passTrackerVeto", 3, 0, 2)
-        h4 = TH1F("passBDT", "passBDT", 3, 0, 2)
+        h0 = TH1F("totalevents", "totalevents", 200, 0, 2000)
+        h1 = TH1F("passtrigger", "passtrigger", 200, 0, 2000)
+        h2 = TH1F("ecalEnergyReq", "ecalEnergyReq", 200, 0, 2000)
+        h3 = TH1F("passTrackerVeto", "passTrackerVeto", 200, 0, 2000)
+        h4 = TH1F("passBDT", "passBDT", 200, 0, 2000)
         
         for filename in os.listdir(dn):
             fn = os.path.join(dn, filename)
@@ -75,6 +75,12 @@ class sampleContainer:
                 Etot = 0
                 EHcal = 0
 
+                decayz = 1
+                for it in SimParticles:
+                    parents = it.second.getParents()
+                    for track_id in parents:
+                        if track_id == 0 and it.second.getPdgID() == -11:
+                            decayz = it.second.getVertex()[2]
 
                 for hit in EcalRecHits:
                     Etot += hit.getEnergy()
@@ -87,12 +93,12 @@ class sampleContainer:
                     if hit.getZPos() >= 870:
                         EHcal += 12.2*hit.getEnergy()
 
-                h0.Fill(1)
+                h0.Fill(decayz)
                 if Eupstream < 1500:
-                    h1.Fill(1)
+                    h1.Fill(decayz)
 
                 if Eupstream < 1500 and Edownstream >= 2500 and EHcal < 2500:
-                    h2.Fill(1)
+                    h2.Fill(decayz)
                         
                     trackerLayerZs = [9.5, 15.5, 24.5, 30.5, 39.5, 45.5, 54.5, 60.5, 93.5, 95.5, 183.5, 185.5]
                     trackerLayersHit = np.zeros(12)
@@ -131,7 +137,7 @@ class sampleContainer:
                         recoil_E = max(e_list)
 
                     if trackinLayer >= 4 and multiTrackinLayer < 4 and recoil_E > 50 and recoil_E < 1200:
-                        h3.Fill(1)
+                        h3.Fill(decayz)
 
                     hits = 0
                     downstreamhits = 0
@@ -244,7 +250,7 @@ class sampleContainer:
 
                         
                     if bdt.predict(xgb.DMatrix(np.vstack((evt,np.zeros_like(evt))),np.zeros(2)))[0] >= 0.999971:
-                        h4.Fill(1)
+                        h4.Fill(decayz)
                         evtcount += 1
 
                         ecalrechits = []
@@ -297,12 +303,12 @@ class sampleContainer:
                                      'TargetScoringPlaneHits': targetscoringplanehits,
                                      'RecoilSimHits': recoilsimhits}
 
-                            
+                        """
                         with open(EDPath + 'eventinfo_{0}.txt'.format(evtcount), 'w') as convert_file:
                             convert_file.write(json.dumps(eventinfo))
                             
                         print("Wrote event {0} to file".format(evtcount))
-            
+                        """
                             
         
         c0.cd()
@@ -336,8 +342,8 @@ if __name__ == '__main__':
 
     parser = OptionParser()
 
-    parser.add_option('--bdt_path', dest='bdt_path', default='/sdf/home/h/horoho/ldmx/thoroho-ldmx/ecal_bdt/cindy.pkl', help='BDT model to use')
-    parser.add_option('--evtdisplay_path', dest='evtdisplay_path', default='/sdf/home/h/horoho/ldmx/test/', help='Where to put events that pass veto')
+    parser.add_option('--bdt_path', dest='bdt_path', default='/sfs/qumulo/qhome/tgh7hx/ldmx/thoroho-ldmx/ecal_bdt/cindy.pkl', help='BDT model to use')
+    parser.add_option('--evtdisplay_path', dest='evtdisplay_path', default='/sfs/qumulo/qhome/tgh7hx/ldmx/signaleffs/ecal_005_', help='Where to put events that pass veto')
     parser.add_option('--swdir', dest='swdir', default='/sdf/home/h/horoho/ldmx/ldmx-sw/install', help='ldmx-sw build directory')
     
     parser.add_option('--bkg_dir', dest='bkg_dir', default='/scratch/tgh7hx/ldmx/batch/targetPN/', help='name of background file directory')
@@ -351,4 +357,4 @@ if __name__ == '__main__':
     gbm = pkl.load(open(options.bdt_path, 'rb'))
 
     print('Loading bkg_file = ', options.bkg_dir)
-    bkgContainer = sampleContainer(options.bkg_dir, options.evtdisplay_path, True, gbm)
+    bkgContainer = sampleContainer(options.sig_dir, options.evtdisplay_path, False, gbm)

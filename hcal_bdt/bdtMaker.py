@@ -194,7 +194,7 @@ class sampleContainer:
     
                     # Fill event with features to train BDT
 
-                    evt.append(rms_r) #0
+                    #evt.append(rms_r) #0
                     evt.append(rms_z) #1
                   
                     evt.append(xstd) #2
