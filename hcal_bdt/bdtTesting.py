@@ -231,7 +231,6 @@ class sampleContainer:
                     zmean_equal /= hits
                     rmean_equal /= hits
                     rms_r /= hits
-                    rms_z /= hits
                         
                     downstreamrmean_gammaproj /= Etot    
                      
@@ -259,8 +258,7 @@ class sampleContainer:
                     zstd_equal = math.sqrt(zstd_equal/hits)
 
                     rms_r = math.sqrt(rms_r)
-                    rms_z = math.sqrt(rms_z)
-                            
+                    
 
                     evt.append(rms_r) #0    
                     evt.append(len(layershit)) #1

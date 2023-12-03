@@ -166,7 +166,6 @@ class sampleContainer:
                     zmean_equal /= hits
                     rmean_equal /= hits
                     rms_r /= hits
-                    rms_z /= hits
                         
                     downstreamrmean_gammaproj /= Etot    
                      
