@@ -66,6 +66,8 @@ class sampleContainer:
                                 
                 if Eupstream < 1500 and E_hcal >= 2500 and Edownstream < 2500 :
 
+                    layershit = []
+
                     hits = 0
                     isohits = 0
                     isoE = 0
@@ -81,7 +83,6 @@ class sampleContainer:
                     rmean_equal=0
 
                     rms_r=0
-                    rms_z=0
 
                     xstd=0
                     ystd=0
@@ -110,47 +111,50 @@ class sampleContainer:
                     
                     
                     for hit in HcalRecHits:
-                        hits += 1
-                        x = hit.getXPos()
-                        y = hit.getYPos()
-                        z = hit.getZPos()
-                        r = math.sqrt(x*x + y*y)
+                        if hit.getZPos() >= 870:
+                            hits += 1
+                            x = hit.getXPos()
+                            y = hit.getYPos()
+                            z = hit.getZPos()
+                            r = math.sqrt(x*x + y*y)
 
-                        energy = hit.getEnergy()
-                        Etot += energy
+                            energy = hit.getEnergy()
+                            Etot += energy
                         
-                        xmean += x*energy
-                        ymean += y*energy
-                        zmean += z*energy
-                        rmean += r*energy
+                            xmean += x*energy
+                            ymean += y*energy
+                            zmean += z*energy
+                            rmean += r*energy
 
-                        xmean_equal += x
-                        ymean_equal += y
-                        zmean_equal += z
-                        rmean_equal += r
+                            xmean_equal += x
+                            ymean_equal += y
+                            zmean_equal += z
+                            rmean_equal += r
 
-                        rms_r += r*r
-                        rms_z += z*z
+                            rms_r += r*r
 
-                        x_proj = x0_gamma[0] + (z - x0_gamma[2])*p_gamma[0]/p_gamma[2]
-                        y_proj = x0_gamma[1] + (z - x0_gamma[2])*p_gamma[1]/p_gamma[2]
-                        projdist = math.sqrt((x-x_proj)**2 + (y-y_proj)**2)
-                        downstreamrmean_gammaproj += projdist*energy
+                            if not z in layershit:
+                                layershit.append(z)
+
+                            x_proj = x0_gamma[0] + (z - x0_gamma[2])*p_gamma[0]/p_gamma[2]
+                            y_proj = x0_gamma[1] + (z - x0_gamma[2])*p_gamma[1]/p_gamma[2]
+                            projdist = math.sqrt((x-x_proj)**2 + (y-y_proj)**2)
+                            downstreamrmean_gammaproj += projdist*energy
                         
-                        closestpoint = 9999
-                        for hit2 in HcalRecHits:
-                            if abs(z - hit2.getZPos()) < 1:
-                                sepx = math.sqrt((x-hit2.getXPos())**2)
-                                sepy = math.sqrt((y-hit2.getYPos())**2)
-                                if sepx > 0 and sepx%50 < 0.01:
-                                    if sepx < closestpoint:
-                                        closestpoint = sepx
-                                elif sepy > 0 and sepy%50 < 0.01:
-                                    if sepy < closestpoint:
-                                        closestpoint = sepy
-                        if closestpoint > 50:
-                            isohits += 1
-                            isoE += energy
+                            closestpoint = 9999
+                            for hit2 in HcalRecHits:
+                                if abs(z - hit2.getZPos()) < 1:
+                                    sepx = math.sqrt((x-hit2.getXPos())**2)
+                                    sepy = math.sqrt((y-hit2.getYPos())**2)
+                                    if sepx > 0 and sepx%50 < 0.01:
+                                        if sepx < closestpoint:
+                                            closestpoint = sepx
+                                    elif sepy > 0 and sepy%50 < 0.01:
+                                        if sepy < closestpoint:
+                                            closestpoint = sepy
+                            if closestpoint > 50:
+                                isohits += 1
+                                isoE += energy
                             
                     xmean /= Etot
                     ymean /= Etot
@@ -167,19 +171,19 @@ class sampleContainer:
                     downstreamrmean_gammaproj /= Etot    
                      
                     for hit in HcalRecHits:
-                        x = hit.getXPos()
-                        y = hit.getYPos()
-                        z = hit.getZPos()
-                        energy = hit.getEnergy()
+                        if hit.getZPos() >= 870:
+                            x = hit.getXPos()
+                            y = hit.getYPos()
+                            z = hit.getZPos()
+                            energy = hit.getEnergy()
 
-                        xstd += energy*(x-xmean)**2
-                        ystd += energy*(y-ymean)**2
-                        zstd += energy*(z-zmean)**2
+                            xstd += energy*(x-xmean)**2
+                            ystd += energy*(y-ymean)**2
+                            zstd += energy*(z-zmean)**2
 
-                        xstd_equal += (x-xmean_equal)**2
-                        ystd_equal += (y-ymean_equal)**2
-                        zstd_equal += (z-zmean_equal)**2
-
+                            xstd_equal += (x-xmean_equal)**2
+                            ystd_equal += (y-ymean_equal)**2
+                            zstd_equal += (z-zmean_equal)**2
 
                     xstd = math.sqrt(xstd/Etot)
                     ystd = math.sqrt(ystd/Etot)
@@ -190,12 +194,11 @@ class sampleContainer:
                     zstd_equal = math.sqrt(zstd_equal/hits)
 
                     rms_r = math.sqrt(rms_r)
-                    rms_z = math.sqrt(rms_z)
     
                     # Fill event with features to train BDT
 
-                    #evt.append(rms_r) #0
-                    evt.append(rms_z) #1
+                    evt.append(rms_r) #0
+                    evt.append(len(layershit)) #1
                   
                     evt.append(xstd) #2
                     evt.append(ystd) #3
@@ -205,13 +208,13 @@ class sampleContainer:
                     evt.append(ymean) #6
                     evt.append(rmean) #7
 
-                    #evt.append(zstd_equal) #8
-                    #evt.append(xstd_equal) #9
-                    #evt.append(ystd_equal) #10
+                    evt.append(zstd_equal) #8
+                    evt.append(xstd_equal) #9
+                    evt.append(ystd_equal) #10
 
-                    #evt.append(rmean_equal) #11
-                    #evt.append(xmean_equal) #12
-                    #evt.append(ymean_equal) #13
+                    evt.append(rmean_equal) #11
+                    evt.append(xmean_equal) #12
+                    evt.append(ymean_equal) #13
                     
                     evt.append(isohits) #14
                     evt.append(isoE) #15
@@ -271,7 +274,7 @@ if __name__ == '__main__':
     parser = OptionParser()
 
     parser.add_option('--seed', dest='seed', type='int', default=4, help='Numpy random seed.')
-    parser.add_option('--train_frac', dest='train_frac', default=0.001, help='Fraction of events to use for training')
+    parser.add_option('--train_frac', dest='train_frac', default=0.999, help='Fraction of events to use for training')
     parser.add_option('--max_evt', dest='max_evt', type='int', default=500000, help='Max Events to load')
     parser.add_option('--out_name', dest='out_name', default='bdt', help='Output Pickle Name')
     parser.add_option('--bdt_path', dest='bdt_path', default='/sfs/qumulo/qhome/tgh7hx/ldmx/hcal_bdt_weights_v2.pkl', help='BDT model to load in')

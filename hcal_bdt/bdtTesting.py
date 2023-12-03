@@ -133,7 +133,9 @@ class sampleContainer:
 
                     if trackinLayer >= 4 and multiTrackinLayer < 4 and recoil_E > 50 and recoil_E < 1200:
                         h3.Fill(decayz)
-                        
+                    
+                    layershit = []
+    
                     hits = 0
                     isohits = 0
                     isoE = 0
@@ -149,7 +151,6 @@ class sampleContainer:
                     rmean_equal = 0
 
                     rms_r = 0
-                    rms_z = 0
                     
                     xstd = 0
                     ystd = 0
@@ -177,45 +178,48 @@ class sampleContainer:
                         
                         
                     for hit in HcalRecHits:
-                        hits += 1
-                        x = hit.getXPos()
-                        y = hit.getYPos()
-                        z = hit.getZPos()
-                        r = math.sqrt(x*x + y*y)
+                        if hit.getZPos() >= 870:
+                            hits += 1
+                            x = hit.getXPos()
+                            y = hit.getYPos()
+                            z = hit.getZPos()
+                            r = math.sqrt(x*x + y*y)
                         
-                        energy = hit.getEnergy()
-                        Etot += energy
+                            energy = hit.getEnergy()
+                            Etot += energy
 
-                        xmean += x*energy
-                        ymean += y*energy
-                        zmean += z*energy
+                            xmean += x*energy
+                            ymean += y*energy
+                            zmean += z*energy
 
-                        xmean_equal += x
-                        ymean_equal += y
-                        zmean_equal += z
+                            xmean_equal += x
+                            ymean_equal += y
+                            zmean_equal += z
 
-                        rms_r += r*r
-                        rms_z += z*z
+                            rms_r += r*r
+                        
+                            if not z in layershit:
+                                layershit.append(z)
                                 
-                        x_proj = x0_gamma[0] + (z - x0_gamma[2])*p_gamma[0]/p_gamma[2]
-                        y_proj = x0_gamma[1] + (z - x0_gamma[2])*p_gamma[1]/p_gamma[2]
-                        projdist = math.sqrt((x-x_proj)**2 + (y-y_proj)**2)
-                        downstreamrmean_gammaproj += projdist*energy
+                            x_proj = x0_gamma[0] + (z - x0_gamma[2])*p_gamma[0]/p_gamma[2]
+                            y_proj = x0_gamma[1] + (z - x0_gamma[2])*p_gamma[1]/p_gamma[2]
+                            projdist = math.sqrt((x-x_proj)**2 + (y-y_proj)**2)
+                            downstreamrmean_gammaproj += projdist*energy
                         
-                        closestpoint = 9999
-                        for hit2 in HcalRecHits:
-                            if abs(z - hit2.getZPos()) < 1:
-                                sepx = math.sqrt((x-hit2.getXPos())**2)
-                                sepy = math.sqrt((y-hit2.getYPos())**2)
-                                if sepx > 0 and sepx%50 == 0:
-                                    if sepx < closestpoint:
-                                        closestpoint = sepx
-                                elif sepy > 0 and sepy%50 == 0:
-                                    if sepy < closestpoint:
-                                        closestpoint = sepy
-                        if closestpoint > 50:
-                            isohits += 1
-                            isoE += energy
+                            closestpoint = 9999
+                            for hit2 in HcalRecHits:
+                                if abs(z - hit2.getZPos()) < 1:
+                                    sepx = math.sqrt((x-hit2.getXPos())**2)
+                                    sepy = math.sqrt((y-hit2.getYPos())**2)
+                                    if sepx > 0 and sepx%50 == 0:
+                                        if sepx < closestpoint:
+                                            closestpoint = sepx
+                                    elif sepy > 0 and sepy%50 == 0:
+                                        if sepy < closestpoint:
+                                            closestpoint = sepy
+                            if closestpoint > 50:
+                                isohits += 1
+                                isoE += energy
                             
                     xmean /= Etot
                     ymean /= Etot
@@ -232,18 +236,19 @@ class sampleContainer:
                     downstreamrmean_gammaproj /= Etot    
                      
                     for hit in HcalRecHits:
-                        x = hit.getXPos()
-                        y = hit.getYPos()
-                        z = hit.getZPos()
-                        energy = hit.getEnergy()
+                        if hit.getZPos() >= 870:
+                            x = hit.getXPos()
+                            y = hit.getYPos()
+                            z = hit.getZPos()
+                            energy = hit.getEnergy()
 
-                        xstd += energy*(x-xmean)**2
-                        ystd += energy*(y-ymean)**2
-                        zstd += energy*(z-zmean)**2
+                            xstd += energy*(x-xmean)**2
+                            ystd += energy*(y-ymean)**2
+                            zstd += energy*(z-zmean)**2
 
-                        xstd_equal += (x-xmean_equal)**2
-                        ystd_equal += (y-ymean_equal)**2
-                        zstd_equal += (z-zmean_equal)**2
+                            xstd_equal += (x-xmean_equal)**2
+                            ystd_equal += (y-ymean_equal)**2
+                            zstd_equal += (z-zmean_equal)**2
 
                     xstd = math.sqrt(xstd/Etot)
                     ystd = math.sqrt(ystd/Etot)
@@ -258,7 +263,7 @@ class sampleContainer:
                             
 
                     evt.append(rms_r) #0    
-                    evt.append(rms_z) #1
+                    evt.append(len(layershit)) #1
         
                     evt.append(xstd) #2
                     evt.append(ystd) #3
@@ -286,7 +291,7 @@ class sampleContainer:
                     if bdt.predict(xgb.DMatrix(np.vstack((evt,np.zeros_like(evt))),np.zeros(2)))[0] > 0.9999525:
                         h4.Fill(decayz)
                         evtcount += 1
-
+                        """
                         ecalrechits = []
                         for hit in EcalRecHits:
                             ecalrechits.append([[hit.getXPos(), hit.getYPos(), hit.getZPos()],
@@ -326,9 +331,9 @@ class sampleContainer:
                                                            sphit.getPdgID()])
 
                         ecalveto = []
-                        ecalveto.append(EcalVeto.getDisc(),
+                        ecalveto.append([EcalVeto.getDisc(),
                                         EcalVeto.getNStraightTracks(),
-                                        EcalVeto.getNLinRegTracks()]
+                                        EcalVeto.getNLinRegTracks()])
 
 
                         eventinfo = {'EcalRecHits': ecalrechits,
@@ -336,6 +341,7 @@ class sampleContainer:
                                      'SimParticles': simparticles,
                                      'TargetScoringPlaneHits': targetscoringplanehits,
                                      'EcalVeto': ecalveto}
+                        """
                         """
                         with open(EDPath + 'eventinfo_{0}.txt'.format(evtcount), 'w') as convert_file:
                             convert_file.write(json.dumps(eventinfo))
@@ -371,7 +377,7 @@ if __name__ == '__main__':
 
     parser = OptionParser()
     
-    parser.add_option('--bdt_path', dest='bdt_path', default='/sfs/qumulo/qhome/tgh7hx/ldmx/hcal_bdt_weights.pkl', help='BDT model to use')
+    parser.add_option('--bdt_path', dest='bdt_path', default='/sdf/home/h/horoho/ldmx/hcal_bdt_weights.pkl', help='BDT model to use')
     parser.add_option('--evtdisplay_path', dest='evtdisplay_path', default='/sfs/qumulo/qhome/tgh7hx/ldmx/hcal_bdt/', help='Where to put events that pass veto')
     
     parser.add_option('--bkg_dir', dest='bkg_dir', default='/sdf/group/ldmx/data/mc23/v14/4.0GeV/v3.2.0_ecalPN_tskim-batch3/', help='name of background file directory')
