@@ -286,7 +286,7 @@ class sampleContainer:
                     evt.append(downstreamrmean_gammaproj) #18
                             
 
-                    if bdt.predict(xgb.DMatrix(np.vstack((evt,np.zeros_like(evt))),np.zeros(2)))[0] > 0.9999525:
+                    if bdt.predict(xgb.DMatrix(np.vstack((evt,np.zeros_like(evt))),np.zeros(2)))[0] >= 0.9998558759689331:
                         h4.Fill(decayz)
                         evtcount += 1
                         """
