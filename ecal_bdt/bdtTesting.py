@@ -136,8 +136,8 @@ class sampleContainer:
                     if len(e_list) > 0:
                         recoil_E = max(e_list)
 
-                    if trackinLayer >= 4 and multiTrackinLayer < 4 and recoil_E > 50 and recoil_E < 1200:
-                        h3.Fill(decayz)
+                    #if trackinLayer >= 4 and multiTrackinLayer < 4 and recoil_E > 50 and recoil_E < 1200:
+                    #    h3.Fill(decayz)
 
                     hits = 0
                     downstreamhits = 0
@@ -252,7 +252,10 @@ class sampleContainer:
                     if bdt.predict(xgb.DMatrix(np.vstack((evt,np.zeros_like(evt))),np.zeros(2)))[0] >= 0.999971:
                         h4.Fill(decayz)
                         evtcount += 1
+                        if trackinLayer >= 4 and multiTrackinLayer < 4 and recoil_E > 50 and recoil_E < 1200:
+                            h3.Fill(decayz)
 
+                        
                         ecalrechits = []
                         for hit in EcalRecHits:
                             ecalrechits.append([[hit.getXPos(), hit.getYPos(), hit.getZPos()],
@@ -303,12 +306,12 @@ class sampleContainer:
                                      'TargetScoringPlaneHits': targetscoringplanehits,
                                      'RecoilSimHits': recoilsimhits}
 
-                        """
+                        
                         with open(EDPath + 'eventinfo_{0}.txt'.format(evtcount), 'w') as convert_file:
                             convert_file.write(json.dumps(eventinfo))
                             
                         print("Wrote event {0} to file".format(evtcount))
-                        """
+                        
                             
         
         c0.cd()
@@ -342,7 +345,7 @@ if __name__ == '__main__':
 
     parser = OptionParser()
 
-    parser.add_option('--bdt_path', dest='bdt_path', default='/sfs/qumulo/qhome/tgh7hx/ldmx/thoroho-ldmx/ecal_bdt/cindy.pkl', help='BDT model to use')
+    parser.add_option('--bdt_path', dest='bdt_path', default='/sdf/home/h/horoho/ldmx/thoroho-ldmx/ecal_bdt/cindy.pkl', help='BDT model to use')
     parser.add_option('--evtdisplay_path', dest='evtdisplay_path', default='/sfs/qumulo/qhome/tgh7hx/ldmx/signaleffs/ecal_005_', help='Where to put events that pass veto')
     parser.add_option('--swdir', dest='swdir', default='/sdf/home/h/horoho/ldmx/ldmx-sw/install', help='ldmx-sw build directory')
     
@@ -357,4 +360,4 @@ if __name__ == '__main__':
     gbm = pkl.load(open(options.bdt_path, 'rb'))
 
     print('Loading bkg_file = ', options.bkg_dir)
-    bkgContainer = sampleContainer(options.sig_dir, options.evtdisplay_path, False, gbm)
+    bkgContainer = sampleContainer(options.bkg_dir, options.evtdisplay_path, True, gbm)

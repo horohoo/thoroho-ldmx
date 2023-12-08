@@ -134,8 +134,8 @@ class sampleContainer:
                                         recoil_E = sphit.getEnergy()
 
 
-                    if trackinLayer >= 4 and multiTrackinLayer < 4 and recoil_E > 50 and recoil_E < 1200:
-                        h3.Fill(decayz)
+                    #if trackinLayer >= 4 and multiTrackinLayer < 4 and recoil_E > 50 and recoil_E < 1200:
+                        #h3.Fill(decayz)
 
                     #BDT Variable Stuff Start Here
                     hits = 0
@@ -170,6 +170,10 @@ class sampleContainer:
                                         if sphit.getPdgID() == 11 and 0 in it.second.getParents():
                                             x0_gamma = sphit.getPosition()
                                             p_gamma = [-sphit.getMomentum()[0], -sphit.getMomentum()[1], 4000 - sphit.getMomentum()[2]]
+                                    else:
+                                        if sphit.getPdgID() == 622:
+                                            x0_gamma = sphit.getPosition()
+                                            p_gamma = sphit.getMomentum()
 
                     downstreamrmean_gammaproj = 0
                     downstreamhits_within1 = 0
@@ -325,7 +329,10 @@ class sampleContainer:
                     if bdt.predict(xgb.DMatrix(np.vstack((evt,np.zeros_like(evt))),np.zeros(2)))[0] >= 0.99993:
                         h4.Fill(decayz)
                         evtcount += 1
+                        if trackinLayer >= 4 and multiTrackinLayer < 4 and recoil_E > 50 and recoil_E < 1200:
+                            h3.Fill(decayz)
 
+                        
                         ecalrechits = []
                         for hit in EcalRecHits:
                             ecalrechits.append([[hit.getXPos(), hit.getYPos(), hit.getZPos()],
@@ -375,12 +382,12 @@ class sampleContainer:
                                      'TargetScoringPlaneHits': targetscoringplanehits,
                                      'RecoilSimHits': recoilsimhits}
 
-                        """
+                        
                         with open(EDPath + 'eventinfo_{0}.txt'.format(evtcount), 'w') as convert_file:
                             convert_file.write(json.dumps(eventinfo))
 
                         print("Wrote event {0} to file".format(evtcount))
-                        """
+                        
 
         """
         h0.Sumw2()
@@ -446,11 +453,11 @@ if __name__ == '__main__':
     parser = OptionParser()
 
     parser.add_option('--out_dir', dest='out_dir', default='testing', help='Output directory')
-    parser.add_option('--bdt_path', dest='bdt_path', default='/sfs/qumulo/qhome/tgh7hx/ldmx/inter_bdt_weights.pkl', help='BDT model to use')
+    parser.add_option('--bdt_path', dest='bdt_path', default='/sdf/home/h/horoho/ldmx/inter_bdt_weights.pkl', help='BDT model to use')
     parser.add_option('--evtdisplay_path', dest='evtdisplay_path', default='/sfs/qumulo/qhome/wer2ct/LDMX/ldmx-analysis/bdt_plots/signaleffs/5MeV_', help='lol')
     parser.add_option('--sig_dir', dest='sig_dir', default='/project/hep_aag/ldmx/ap/visibles/produced/v14/mAp_005', help='name of signal file directory')
 
-    parser.add_options('--bkg_dir', dest='bkg_dir', default='/project/hep_aag/ldmx/ap/visibles/produced/v14/mAp_005', help='name of background file directory')
+    parser.add_option('--bkg_dir', dest='bkg_dir', default='/project/hep_aag/ldmx/ap/visibles/produced/v14/mAp_005', help='name of background file directory')
 
     (options, args) = parser.parse_args()
 
@@ -459,4 +466,4 @@ if __name__ == '__main__':
     gbm = pkl.load(open(options.bdt_path, 'rb'))
 
     print('Loading sig_file = ', options.sig_dir)
-    bkgContainer = sampleContainer(options.sig_dir, options.evtdisplay_path, False, gbm)
+    bkgContainer = sampleContainer(options.bkg_dir, options.evtdisplay_path, True, gbm)
