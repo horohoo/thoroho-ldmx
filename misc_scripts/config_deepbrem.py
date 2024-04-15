@@ -13,13 +13,21 @@ p=ldmxcfg.Process(thisPassName)
 p.maxTriesPerEvent = 1000
 #import all processors
 
-from LDMX.Biasing import ecal
-from LDMX.SimCore import generators as gen
+from LDMX.Biasing import filters
+from LDMX.SimCore import generators
+from LDMX.SimCore import simulator
 
 detector='ldmx-det-v14'
-sim = ecal.gamma_mumu(detector, gen.single_4gev_e_upstream_tagger())
+sim = simulator.simulator("mySim")
+sim.setDetector(detector, True) # True turns on scoring planes
+# below include all the filters we want
+sim.actions.extend([
+   filters.TaggerVetoFilter(),
+   filters.TargetBremFilter(),
+   filters.EndZFilter()
+   ])
 sim.beamSpotSmear = [20.,80.,0.]
-sim.description = '4 GeV ecal gamma --> mu+mu- simulation'
+sim.description = 'Inclusive sample with deep brem filter'
 
 
 ############################################################
