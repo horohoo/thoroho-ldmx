@@ -24,7 +24,7 @@ sim.setDetector(detector, True) # True turns on scoring planes
 sim.actions.extend([
    filters.TaggerVetoFilter(),
    filters.TargetBremFilter(),
-   filters.EndZFilter()
+   filters.DeepEcalProcessFilter(1200, "conv", 500)
    ])
 sim.beamSpotSmear = [20.,80.,0.]
 sim.description = 'Inclusive sample with deep brem filter'
