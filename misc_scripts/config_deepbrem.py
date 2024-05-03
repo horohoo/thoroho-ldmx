@@ -10,7 +10,7 @@ from LDMX.Framework import ldmxcfg
 thisPassName="sim"
 p=ldmxcfg.Process(thisPassName)
 
-p.maxTriesPerEvent = 1000
+p.maxTriesPerEvent = 10000000
 #import all processors
 
 from LDMX.Biasing import filters
