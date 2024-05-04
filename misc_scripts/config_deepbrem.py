@@ -14,17 +14,23 @@ p.maxTriesPerEvent = 10000000
 #import all processors
 
 from LDMX.Biasing import filters
+from LDMX.Biasing import util
 from LDMX.SimCore import generators
 from LDMX.SimCore import simulator
 
 detector='ldmx-det-v14'
-sim = simulator.simulator("mySim")
+sim = simulator.simulator("deepBrem")
 sim.setDetector(detector, True) # True turns on scoring planes
+sim.generators.append(generators.single_4gev_e_upstream_tagger())
 # below include all the filters we want
 sim.actions.extend([
+   #util.PartialEnergySorter(1000.0),
+   util.TrackProcessFilter.electron_brem(),
    filters.TaggerVetoFilter(),
-   filters.TargetBremFilter(),
-   filters.DeepEcalProcessFilter(1200, "conv", 500)
+   #filters.TargetBremFilter(),
+   filters.PrimaryToEcalFilter(50.0),
+   filters.DeepEcalProcessFilter(bias_threshold=1200.0, processes=["photonNuclear"], ecal_min_Z=300.0),
+   util.TrackProcessFilter.conversion()
    ])
 sim.beamSpotSmear = [20.,80.,0.]
 sim.description = 'Inclusive sample with deep brem filter'
@@ -41,7 +47,7 @@ p.run = int(sys.argv[1])
 nElectrons = 1
 beamEnergy = 4.0; #in GeV
 
-p.maxEvents = 100000
+p.maxEvents = 1
 
 #p.histogramFile = f'hist.root'
 p.outputFiles = [sys.argv[2]]
@@ -111,21 +117,21 @@ eCount.use_simulated_electron_number = True
 eCount.input_pass_name=thisPassName
 
 #trigger setup, no skim
-simpleTrigger = TriggerProcessor('simpleTrigger')
-simpleTrigger.start_layer = 0
-simpleTrigger.input_pass = thisPassName
+#simpleTrigger = TriggerProcessor('simpleTrigger')
+#simpleTrigger.start_layer = 0
+#simpleTrigger.input_pass = thisPassName
 
 p.sequence=[sim,
             ecalDigi,
             ecalReco,
             ecalVeto,
-            tsDigisTag,
-            tsDigisUp,
-            tsDigisDown,
-            tsClustersTag,
-            tsClustersUp,
-            tsClustersDown,
-            trigScintTrack,
+            #tsDigisTag,
+            #tsDigisUp,
+            #tsDigisDown,
+            #tsClustersTag,
+            #tsClustersUp,
+            #tsClustersDown,
+            #trigScintTrack,
             eCount,
             #simpleTrigger, 
             hcalDigi, 
