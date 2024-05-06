@@ -15,22 +15,26 @@ p.maxTriesPerEvent = 10000000
 
 from LDMX.Biasing import filters
 from LDMX.Biasing import util
+from LDMX.Biasing import include as biasinclude
 from LDMX.SimCore import generators
 from LDMX.SimCore import simulator
+from LDMX.SimCore import bias_operators
 
-detector='ldmx-det-v14'
+detector='ldmx-det-v14-8gev'
 sim = simulator.simulator("deepBrem")
 sim.setDetector(detector, True) # True turns on scoring planes
-sim.generators.append(generators.single_4gev_e_upstream_tagger())
+sim.generators.append(generators.single_8gev_e_upstream_tagger())
 # below include all the filters we want
+
 sim.actions.extend([
-   #util.PartialEnergySorter(1000.0),
+   util.PartialEnergySorter(1000.0),
    util.TrackProcessFilter.electron_brem(),
-   filters.TaggerVetoFilter(),
+   filters.TaggerVetoFilter(thresh=7600.),
    #filters.TargetBremFilter(),
    filters.PrimaryToEcalFilter(50.0),
-   filters.DeepEcalProcessFilter(bias_threshold=1200.0, processes=["photonNuclear"], ecal_min_Z=300.0),
-   util.TrackProcessFilter.conversion()
+   filters.DeepEcalProcessFilter(bias_threshold=1000.0, processes=["conv"], ecal_min_Z=500.0),
+   util.TrackProcessFilter.conversion(),
+   util.StepPrinter()
    ])
 sim.beamSpotSmear = [20.,80.,0.]
 sim.description = 'Inclusive sample with deep brem filter'
@@ -38,16 +42,15 @@ sim.description = 'Inclusive sample with deep brem filter'
 
 ############################################################
 # Below should be the same for all sim scenarios
-
 #
 #Set run parameters. These are all pulled from the job config
 #
 
 p.run = int(sys.argv[1])
 nElectrons = 1
-beamEnergy = 4.0; #in GeV
+beamEnergy = 8.0; #in GeV
 
-p.maxEvents = 1
+p.maxEvents = 1000
 
 #p.histogramFile = f'hist.root'
 p.outputFiles = [sys.argv[2]]
