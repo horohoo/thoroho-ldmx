@@ -27,14 +27,14 @@ sim.generators.append(generators.single_8gev_e_upstream_tagger())
 # below include all the filters we want
 
 sim.actions.extend([
-   util.PartialEnergySorter(1000.0),
+   util.PartialEnergySorter(4500.0),
    util.TrackProcessFilter.electron_brem(),
    filters.TaggerVetoFilter(thresh=7600.),
    #filters.TargetBremFilter(),
    filters.PrimaryToEcalFilter(50.0),
-   filters.DeepEcalProcessFilter(bias_threshold=1000.0, processes=["conv"], ecal_min_Z=500.0),
+   filters.DeepEcalProcessFilter(bias_threshold=5000.0, processes=["conv"], ecal_min_Z=350.0, require_photon_fromTarget=False),
    util.TrackProcessFilter.conversion(),
-   util.StepPrinter()
+   #util.StepPrinter()
    ])
 sim.beamSpotSmear = [20.,80.,0.]
 sim.description = 'Inclusive sample with deep brem filter'
@@ -50,7 +50,7 @@ p.run = int(sys.argv[1])
 nElectrons = 1
 beamEnergy = 8.0; #in GeV
 
-p.maxEvents = 1000
+p.maxEvents = 500
 
 #p.histogramFile = f'hist.root'
 p.outputFiles = [sys.argv[2]]
